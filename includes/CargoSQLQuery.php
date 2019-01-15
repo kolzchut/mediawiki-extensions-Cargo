@@ -741,6 +741,7 @@ class CargoSQLQuery {
 
 		// First, create an array of the virtual fields in the current
 		// set of tables.
+		global $wgCargoOrderListByWeight;
 		$virtualFields = array();
 		foreach ( $this->mTableSchemas as $tableName => $tableSchema ) {
 			foreach ( $tableSchema->mFieldDescriptions as $fieldName => $fieldDescription ) {
@@ -754,6 +755,7 @@ class CargoSQLQuery {
 							'tableAlias' => $tableAlias,
 							'tableName' => $tableName,
 							'fieldType' => $fieldDescription->mType,
+							'isList' => $fieldDescription->mIsList,
 							'isHierarchy' => $fieldDescription->mIsHierarchy
 						);
 					}
@@ -1000,6 +1002,7 @@ class CargoSQLQuery {
 
 		// "order by"
 		$matches = array();
+		$virtualOrderBy = [];
 		foreach ( $virtualFields as $virtualField ) {
 			$fieldName = $virtualField['fieldName'];
 			$tableAlias = $virtualField['tableAlias'];
@@ -1008,12 +1011,12 @@ class CargoSQLQuery {
 			$foundMatch1 = preg_match( $pattern1, $this->mOrderByStr, $matches );
 			$pattern2 = CargoUtils::getSQLFieldPattern( $fieldName );
 			$foundMatch2 = false;
+			$fieldTableAlias = $tableAlias . '__' . $fieldName;
 
 			if ( !$foundMatch1 ) {
 				$foundMatch2 = preg_match( $pattern2, $this->mOrderByStr, $matches );
 			}
 			if ( $foundMatch1 || $foundMatch2 ) {
-				$fieldTableAlias = $tableAlias . '__' . $fieldName;
 				if ( $this->fieldTableIsIncluded( $fieldTableAlias ) ) {
 					$replacement = "$fieldTableAlias._value";
 				} else {
@@ -1028,6 +1031,12 @@ class CargoSQLQuery {
 					$this->mOrderByStr = preg_replace( $pattern2, $replacement, $this->mOrderByStr );
 				}
 			}
+			else if($virtualField['isList'] && $this->fieldTableIsIncluded( $fieldTableAlias )){
+				$virtualOrderBy[] = $tableName . "__" . $fieldName . "._weight";
+			}
+		}
+		if($wgCargoOrderListByWeight && count($virtualOrderBy)){
+			$this->mOrderByStr = implode(', ', $virtualOrderBy) . ($this->mOrderByStr ? ' ,' . $this->mOrderByStr : '');
 		}
 	}
 

@@ -389,7 +389,7 @@ class CargoStore {
 				$fieldTableName = $tableName . '__' . $fieldName;
 				$delimiter = $fieldDescription->getDelimiter();
 				$individualValues = explode( $delimiter, $tableFieldValues[$fieldName] );
-				foreach ( $individualValues as $individualValue ) {
+				foreach ( $individualValues as $keyOfIndividualValue => $individualValue ) {
 					$individualValue = trim( $individualValue );
 					// Ignore blank values.
 					if ( $individualValue == '' ) {
@@ -397,7 +397,8 @@ class CargoStore {
 					}
 					$fieldValues = array(
 						'_rowID' => $curRowID,
-						'_value' => $individualValue
+						'_value' => $individualValue,
+						'_weight' => $keyOfIndividualValue
 					);
 					// For coordinates, there are two more
 					// fields, for latitude and longitude.
