@@ -332,6 +332,7 @@
 		"Cargo24HourTime": false,
 		"CargoDefaultMapService": "OpenLayers",
 		"CargoGoogleMapsKey": null,
+		"CargoGoogleMapsUseWikiLang": false,
 		"CargoMapClusteringMinimum": 80,
 		"CargoDrilldownUseTabs": true,
 		"CargoDrilldownSmallestFontSize": -1,
